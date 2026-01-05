@@ -1,0 +1,184 @@
+<div class="data-storage-container">
+  <h1>📊 Data Storage Example</h1>
+  <p class="subtitle">Complete guide on how to store data in your Analytics Dashboard</p>
+
+  <!-- Success/Error Messages -->
+  <div class="messages">
+    <div class="success-message" *ngIf="successMessage">
+      ✅ {{ successMessage }}
+      <button (click)="clearMessages()">×</button>
+    </div>
+    <div class="error-message" *ngIf="errorMessage">
+      ❌ {{ errorMessage }}
+      <button (click)="clearMessages()">×</button>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- SECTION 1: CREATE - Store Single Record -->
+  <!-- ============================================ -->
+  <section class="storage-section">
+    <h2>1️⃣ Store Single Analytics Record</h2>
+    <p>Fill in the form below to store a single analytics record in the database.</p>
+
+    <form class="analytics-form" (ngSubmit)="storeAnalyticsData()">
+      <div class="form-group">
+        <label for="metricName">Metric Name:</label>
+        <input type="text" id="metricName" [(ngModel)]="newMetricName" name="metricName"
+          placeholder="e.g., page_views, clicks, conversions" required />
+      </div>
+
+      <div class="form-group">
+        <label for="value">Value:</label>
+        <input type="number" id="value" [(ngModel)]="newValue" name="value" placeholder="e.g., 1500" required />
+      </div>
+
+      <div class="form-group">
+        <label for="category">Category:</label>
+        <input type="text" id="category" [(ngModel)]="newCategory" name="category"
+          placeholder="e.g., website, ads, sales" required />
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="isLoading">
+        {{ isLoading ? 'Storing...' : 'Store Data' }}
+      </button>
+    </form>
+
+    <div class="code-example">
+      <h4>📝 How it works:</h4>
+      <pre ngNonBindable><code>// Frontend (Angular Component)
+this.analyticsService.createAnalyticsData(
+  'page_views',  // metric_name
+  1500,          // value
+  'website'      // category
+).subscribe(response => &#123;
+  console.log('Data stored:', response);
+&#125;);
+
+// ↓ HTTP POST Request ↓
+
+// Backend (FastAPI)
+&#64;router.post("/analytics/data")
+async def create_analytics_data(...):
+    new_data = models.AnalyticsData(
+        metric_name=metric_name,
+        value=value,
+        category=category
+    )
+    db.add(new_data)
+    await db.commit()  // ← Saves to database
+    return new_data</code></pre>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- SECTION 2: CREATE - Store Multiple Records -->
+  <!-- ============================================ -->
+  <section class="storage-section">
+    <h2>2️⃣ Store Multiple Records (Bulk Insert)</h2>
+    <p>Click the button below to store 5 sample analytics records at once.</p>
+
+    <button class="btn-secondary" (click)="storeBulkAnalyticsData()" [disabled]="isLoading">
+      {{ isLoading ? 'Storing...' : 'Store 5 Sample Records' }}
+    </button>
+
+    <div class="code-example">
+      <h4>📝 Bulk Insert Example:</h4>
+      <pre ngNonBindable><code>const bulkData = [
+  &#123; metric_name: 'page_views', value: 1500, category: 'website' &#125;,
+  &#123; metric_name: 'clicks', value: 250, category: 'ads' &#125;,
+  &#123; metric_name: 'conversions', value: 45, category: 'sales' &#125;
+];
+
+this.analyticsService.createBulkAnalyticsData(bulkData)
+  .subscribe(response => &#123;
+    console.log(response.count + " records stored!");
+  &#125;);</code></pre>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- SECTION 3: READ - Display Stored Data -->
+  <!-- ============================================ -->
+  <section class="storage-section">
+    <h2>3️⃣ View Stored Analytics Data</h2>
+    <p>All analytics data currently stored in the database:</p>
+
+    <div class="filter-buttons">
+      <button (click)="loadAnalyticsData()">All Categories</button>
+      <button (click)="filterByCategory('website')">Website</button>
+      <button (click)="filterByCategory('ads')">Ads</button>
+      <button (click)="filterByCategory('sales')">Sales</button>
+    </div>
+
+    <div class="loading" *ngIf="isLoading">Loading data...</div>
+
+    <div class="data-table" *ngIf="!isLoading && analyticsDataList.length > 0">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Metric Name</th>
+            <th>Value</th>
+            <th>Category</th>
+            <th>Recorded At</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let data of analyticsDataList">
+            <td>{{ data.id }}</td>
+            <td>{{ data.metric_name }}</td>
+            <td>{{ data.value }}</td>
+            <td><span class="category-badge">{{ data.category }}</span></td>
+            <td>{{ data.recorded_at | date:'short' }}</td>
+            <td class="actions">
+              <button class="btn-edit" (click)="updateAnalyticsData(data.id!, data.value + 100)">
+                Update
+              </button>
+              <button class="btn-delete" (click)='deleteAnalyticsData(data.id!)'>
+                Delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="no-data" *ngIf="!isLoading && analyticsDataList.length === 0">
+      No analytics data found. Store some data using the form above!
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- SECTION 4: Data Flow Diagram -->
+  <!-- ============================================ -->
+  <section class="storage-section">
+    <h2>4️⃣ Complete Data Flow</h2>
+    <div class="flow-diagram">
+      <div class="flow-step">
+        <div class="step-number">1</div>
+        <h3>Frontend (Angular)</h3>
+        <p>User fills form → Component calls Service</p>
+      </div>
+      <div class="arrow">→</div>
+      <div class="flow-step">
+        <div class="step-number">2</div>
+        <h3>HTTP Request</h3>
+        <p>Service sends POST request with data</p>
+      </div>
+      <div class="arrow">→</div>
+      <div class="flow-step">
+        <div class="step-number">3</div>
+        <h3>Backend (FastAPI)</h3>
+        <p>API endpoint receives and validates data</p>
+      </div>
+      <div class="arrow">→</div>
+      <div class="flow-step">
+        <div class="step-number">4</div>
+        <h3>Database (SQLite)</h3>
+        <p>Data is stored in analytics.db file</p>
+      </div>
+    </div>
+  </section>
+</div>

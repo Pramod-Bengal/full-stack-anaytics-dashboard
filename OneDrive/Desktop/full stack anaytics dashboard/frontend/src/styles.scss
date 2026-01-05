@@ -1,0 +1,65 @@
+@import 'styles/variables';
+@import 'styles/mixins';
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    outline: none;
+}
+
+body {
+    font-family: $font-family-main;
+    background-color: $bg-dark;
+    color: $text-main;
+    line-height: 1.5;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: 600;
+    margin-bottom: $spacing-md;
+    color: $text-main;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: color 0.2s;
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+}
+
+// Scrollbar
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: $bg-dark;
+}
+
+::-webkit-scrollbar-thumb {
+    background: $bg-hover;
+    border-radius: $radius-md;
+
+    &:hover {
+        background: $primary;
+    }
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 $spacing-md;
+}
