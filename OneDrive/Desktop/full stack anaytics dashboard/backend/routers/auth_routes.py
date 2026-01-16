@@ -37,7 +37,8 @@ async def register(user: schemas.UserCreate, db: AsyncSession = Depends(database
             email=user.email,
             hashed_password=hashed_password,
             full_name=user.full_name,
-            role=user.role, 
+            bio=user.bio,
+            role=user.role.lower() if user.role else "user", 
             is_active=True
         )
         

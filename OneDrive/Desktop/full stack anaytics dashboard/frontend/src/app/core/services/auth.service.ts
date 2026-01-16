@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, map } from 'rxjs';
 
 export interface User {
     id?: number;
     email: string;
     fullName: string;
+    bio?: string;
     password?: string;
     role?: string;
 }
@@ -56,5 +57,35 @@ export class AuthService {
 
     getToken(): string | null {
         return localStorage.getItem('access_token');
+    }
+
+    getProfile(): Observable<User> {
+        const token = this.getToken();
+        return this.http.get<any>(`${this.apiUrl}/users/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        }).pipe(
+            map((u: any) => ({
+                ...u,
+                fullName: u.full_name
+            }))
+        );
+    }
+
+    updateProfile(data: Partial<User>): Observable<User> {
+        const token = this.getToken();
+        const backendData = {
+            full_name: data.fullName,
+            email: data.email,
+            bio: data.bio,
+            password: data.password
+        };
+        return this.http.put<any>(`${this.apiUrl}/users/me`, backendData, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        }).pipe(
+            map((u: any) => ({
+                ...u,
+                fullName: u.full_name
+            }))
+        );
     }
 }

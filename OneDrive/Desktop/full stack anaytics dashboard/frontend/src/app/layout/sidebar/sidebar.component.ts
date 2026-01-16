@@ -29,10 +29,6 @@ import { RouterModule } from '@angular/router';
           <span class="icon">🛡️</span>
           <span class="label">Admin</span>
         </a>
-        <a routerLink="/data-storage" routerLinkActive="active" class="nav-item">
-          <span class="icon">💾</span>
-          <span class="label">Data Storage</span>
-        </a>
       </nav>
 
       <div class="footer">

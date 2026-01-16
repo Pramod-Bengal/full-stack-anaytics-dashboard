@@ -12,11 +12,9 @@ router = APIRouter(
 # ============================================
 # CREATE - Store New Analytics Data
 # ============================================
-@router.post("/data", response_model=dict)
+@router.post("/data", response_model=schemas.AnalyticsOut)
 async def create_analytics_data(
-    metric_name: str,
-    value: int,
-    category: str,
+    data: schemas.AnalyticsCreate,
     db: AsyncSession = Depends(database.get_db),
     current_user: models.User = Depends(deps.get_current_active_user)
 ):
@@ -25,9 +23,9 @@ async def create_analytics_data(
     """
     # Create new analytics record
     new_data = models.AnalyticsData(
-        metric_name=metric_name,
-        value=value,
-        category=category
+        metric_name=data.metric_name,
+        value=data.value,
+        category=data.category
     )
     
     # Save to database
@@ -35,20 +33,13 @@ async def create_analytics_data(
     await db.commit()
     await db.refresh(new_data)
     
-    return {
-        "message": "Analytics data stored successfully",
-        "id": new_data.id,
-        "metric_name": new_data.metric_name,
-        "value": new_data.value,
-        "category": new_data.category,
-        "recorded_at": new_data.recorded_at
-    }
+    return new_data
 
 
 # ============================================
 # READ - Get All Analytics Data
 # ============================================
-@router.get("/data", response_model=List[dict])
+@router.get("/data", response_model=List[schemas.AnalyticsOut])
 async def get_analytics_data(
     skip: int = 0,
     limit: int = 100,
@@ -59,30 +50,13 @@ async def get_analytics_data(
     """
     Retrieve analytics data from the database.
     """
-    # Build query
     stmt = select(models.AnalyticsData)
-    
-    # Apply category filter if provided
     if category:
         stmt = stmt.where(models.AnalyticsData.category == category)
-    
-    # Apply pagination
     stmt = stmt.offset(skip).limit(limit)
     
     result = await db.execute(stmt)
-    analytics_data = result.scalars().all()
-    
-    # Convert to list of dictionaries
-    return [
-        {
-            "id": data.id,
-            "metric_name": data.metric_name,
-            "value": data.value,
-            "category": data.category,
-            "recorded_at": data.recorded_at
-        }
-        for data in analytics_data
-    ]
+    return result.scalars().all()
 
 
 # ============================================
@@ -189,7 +163,7 @@ async def delete_analytics_data(
 # ============================================
 @router.post("/data/bulk", response_model=dict)
 async def create_bulk_analytics_data(
-    data_list: List[dict],
+    data_list: List[schemas.AnalyticsCreate],
     db: AsyncSession = Depends(database.get_db),
     current_user: models.User = Depends(deps.get_current_active_user)
 ):
@@ -198,9 +172,9 @@ async def create_bulk_analytics_data(
     """
     new_records = [
         models.AnalyticsData(
-            metric_name=item.get("metric_name"),
-            value=item.get("value"),
-            category=item.get("category")
+            metric_name=item.metric_name,
+            value=item.value,
+            category=item.category
         )
         for item in data_list
     ]

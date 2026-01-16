@@ -1,0 +1,62 @@
+==================================================
+CONNECTING TO DATABASE (Reporting to File)...
+==================================================
+
+[ USERS TABLE ]
+Total Users: 22
+
+ID    | Role       | Email                          | Name
+------------------------------------------------------------
+1     | user       | debug_user@example.com         | Debug User
+2     | user       | test_1767536489@example.com    | Storage Tester
+3     | user       | test_1767536938@example.com    | Storage Tester
+4     | user       | test_1767537059@example.com    | Storage Tester
+5     | editor     | raghu200412@gmail.com          | pramod
+6     | user       | raghu2004@gmail.com            | asd
+7     | user       | test_1767541398@example.com    | Storage Tester
+8     | user       | test_1767544628@example.com    | Storage Tester
+9     | user       | test_1767545617@example.com    | Storage Tester
+10    | user       | pramodbngl@gmail.com           | pramod
+11    | user       | pram@gmail.com                 | hi
+12    | user       | raghu2005@gmail.com            | Pramod
+13    | user       | raghu200w5@gmail.com           | hu
+14    | user       | raghu20050@gmail.com           | hllll
+15    | admin      | pramodbenagal@gmail.com        | pammu
+16    | user       | pramodbenagali@gmail.com       | hu
+17    | user       | pramodbenagalq@gmail.com       | ss
+18    | user       | raghu20051@gmail.com           | Pramod
+19    | user       | raghu200512@gmail.com          | pramodnaik
+20    | user       | admin@example.com              | System Admin
+21    | user       | pammu@gmail.com                | raj
+22    | user       | pramodbeagl@gmail.com          | kiiii
+
+==================================================
+
+[ ANALYTICS DATA TABLE (Last 20) ]
+Total Records Displayed: 20
+
+ID    | Category        | Metric               | Value      | Recorded At
+--------------------------------------------------------------------------------
+2     | testing         | direct_test          | 777        | 2025-12-25 08:39:59
+3     | testing         | direct_test          | 777        | 2025-12-31 10:53:33
+4     | Network         | Memory Usage         | 1007       | 2026-01-04 14:21:35
+5     | Network         | API Latency          | 240        | 2026-01-04 14:21:37
+6     | System          | Error Rate           | 2          | 2026-01-04 14:21:37
+7     | Business        | Active Subs          | 150        | 2026-01-04 14:21:37
+8     | System          | User Retention       | 2768       | 2026-01-04 14:29:05
+9     | Network         | API Latency          | 240        | 2026-01-04 14:29:07
+10    | System          | Error Rate           | 2          | 2026-01-04 14:29:07
+11    | Business        | Active Subs          | 150        | 2026-01-04 14:29:07
+12    | User            | Memory Usage         | 4420       | 2026-01-04 14:31:05
+13    | Network         | API Latency          | 240        | 2026-01-04 14:31:07
+14    | System          | Error Rate           | 2          | 2026-01-04 14:31:07
+15    | Business        | Active Subs          | 150        | 2026-01-04 14:31:07
+16    | System          | Requests/Sec         | 4821       | 2026-01-04 15:43:24
+17    | Network         | API Latency          | 240        | 2026-01-04 15:43:26
+18    | System          | Error Rate           | 2          | 2026-01-04 15:43:26
+19    | Business        | Active Subs          | 150        | 2026-01-04 15:43:26
+20    | Network         | Memory Usage         | 4978       | 2026-01-04 16:37:15
+21    | Network         | API Latency          | 240        | 2026-01-04 16:37:17
+
+==================================================
+DONE

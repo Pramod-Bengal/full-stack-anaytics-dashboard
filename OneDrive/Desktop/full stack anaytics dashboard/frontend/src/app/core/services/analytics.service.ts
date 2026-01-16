@@ -58,20 +58,17 @@ export class AnalyticsService {
         metricName: string,
         value: number,
         category: string
-    ): Observable<AnalyticsResponse> {
-        const params = {
+    ): Observable<AnalyticsData> {
+        const body = {
             metric_name: metricName,
             value: value,
             category: category
         };
 
-        return this.http.post<AnalyticsResponse>(
+        return this.http.post<AnalyticsData>(
             `${this.apiUrl}/data`,
-            null,
-            {
-                headers: this.getHeaders(),
-                params: params
-            }
+            body,
+            { headers: this.getHeaders() }
         );
     }
 

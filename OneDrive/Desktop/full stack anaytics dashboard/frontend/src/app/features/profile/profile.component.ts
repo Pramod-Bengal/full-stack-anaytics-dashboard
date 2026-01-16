@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AuthService, User } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-profile',
@@ -9,35 +10,44 @@ import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
   template: `
     <div class="profile-container">
       <div class="profile-header">
-        <div class="avatar-large">U</div>
-        <div class="user-info">
-          <h2>User Name</h2>
-          <p>user&#64;example.com</p>
-          <span class="role-badge">Administrator</span>
+        <div class="avatar-large">{{ (currentUser?.fullName || 'U')[0] }}</div>
+        <div class="user-info" *ngIf="currentUser">
+          <h2>{{ currentUser.fullName }}</h2>
+          <p>{{ currentUser.email }}</p>
+          <span class="role-badge">{{ currentUser.role || 'User' }}</span>
+        </div>
+        <div class="user-info" *ngIf="!currentUser && !loading">
+          <h2>Loading Profile...</h2>
         </div>
       </div>
 
       <div class="settings-card">
         <h3>Account Settings</h3>
-        <form [formGroup]="profileForm">
+        
+        <div *ngIf="success" class="alert-success">Profile updated successfully!</div>
+        <div *ngIf="error" class="alert-error">{{error}}</div>
+        
+        <form [formGroup]="profileForm" (ngSubmit)="saveChanges()">
           <div class="form-row">
             <div class="form-group">
               <label>Full Name</label>
-              <input type="text" formControlName="fullName">
+              <input type="text" formControlName="fullName" placeholder="Your full name">
             </div>
             <div class="form-group">
               <label>Email Address</label>
-              <input type="email" formControlName="email">
+              <input type="email" formControlName="email" placeholder="email@example.com">
             </div>
           </div>
           
           <div class="form-group">
             <label>Bio</label>
-            <textarea formControlName="bio" rows="4"></textarea>
+            <textarea formControlName="bio" rows="4" placeholder="Tell us about yourself..."></textarea>
           </div>
 
           <div class="actions">
-            <button class="btn-primary">Save Changes</button>
+            <button type="submit" class="btn-primary" [disabled]="loading || profileForm.invalid">
+              {{ loading ? 'Saving...' : 'Save Changes' }}
+            </button>
           </div>
         </form>
       </div>
@@ -46,6 +56,9 @@ import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
   styles: [`
     @import 'variables';
     @import 'mixins';
+
+    .alert-success { background: rgba($success, 0.1); color: $success; padding: 12px; border-radius: 8px; margin-bottom: 16px; border: 1px solid $success; font-size: 14px; }
+    .alert-error { background: rgba($error, 0.1); color: $error; padding: 12px; border-radius: 8px; margin-bottom: 16px; border: 1px solid $error; font-size: 14px; }
 
     .profile-container {
       max-width: 800px;
@@ -75,7 +88,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
       }
 
       .user-info {
-        h2 { margin-bottom: 4px; }
+        h2 { margin-bottom: 4px; color: white; }
         p { color: $text-secondary; margin-bottom: $spacing-sm; }
         .role-badge {
           background: rgba($primary, 0.2);
@@ -84,6 +97,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
           border-radius: 20px;
           font-size: $font-size-sm;
           font-weight: 600;
+          text-transform: capitalize;
         }
       }
     }
@@ -93,7 +107,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
       padding: $spacing-xl;
       border-radius: $radius-lg;
 
-      h3 { margin-bottom: $spacing-lg; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: $spacing-md; }
+      h3 { margin-bottom: $spacing-lg; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: $spacing-md; color: $accent; }
     }
 
     .form-row {
@@ -111,6 +125,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
         display: block;
         margin-bottom: $spacing-sm;
         color: $text-secondary;
+        font-size: 13px;
       }
 
       input, textarea {
@@ -120,30 +135,89 @@ import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
         border: 1px solid rgba(255,255,255,0.1);
         border-radius: $radius-md;
         color: white;
+        font-size: 14px;
         
-        &:focus { border-color: $primary; }
+        &:focus { border-color: $primary; outline: none; box-shadow: 0 0 0 2px rgba($primary, 0.2); }
       }
+    }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
     }
 
     .btn-primary {
       padding: $spacing-md $spacing-xl;
       background: $primary;
       color: white;
+      border: none;
       border-radius: $radius-md;
       font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
       
-      &:hover { background: lighten($primary, 5%); }
+      &:hover:not(:disabled) { background: lighten($primary, 5%); transform: translateY(-1px); }
+      &:disabled { opacity: 0.5; cursor: not-allowed; }
     }
   `]
 })
-export class ProfileComponent {
+export class ProfileComponent implements OnInit {
   profileForm: FormGroup;
+  loading = false;
+  success = false;
+  error: string | null = null;
+  currentUser: User | null = null;
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private authService: AuthService) {
     this.profileForm = this.fb.group({
-      fullName: ['User Name'],
-      email: ['user@example.com'],
-      bio: ['Full stack developer located in San Francisco.']
+      fullName: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      bio: ['']
     });
+  }
+
+  ngOnInit() {
+    this.loadProfile();
+  }
+
+  loadProfile() {
+    this.loading = true;
+    this.authService.getProfile().subscribe({
+      next: (user) => {
+        this.currentUser = user;
+        this.profileForm.patchValue({
+          fullName: user.fullName,
+          email: user.email,
+          bio: user.bio
+        });
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = "Token expired or server error. Please login again.";
+        this.loading = false;
+        console.error(err);
+      }
+    });
+  }
+
+  saveChanges() {
+    if (this.profileForm.valid) {
+      this.loading = true;
+      this.error = null;
+      this.success = false;
+
+      this.authService.updateProfile(this.profileForm.value).subscribe({
+        next: (updatedUser) => {
+          this.currentUser = updatedUser;
+          this.success = true;
+          this.loading = false;
+          setTimeout(() => this.success = false, 3000);
+        },
+        error: (err) => {
+          this.error = err.error?.detail || "Failed to update profile.";
+          this.loading = false;
+        }
+      });
+    }
   }
 }

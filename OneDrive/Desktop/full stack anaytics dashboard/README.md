@@ -76,4 +76,42 @@ A modern full-stack analytics dashboard built with a FastAPI backend and an Angu
 
 ## Infrastructure
 
-- The project includes a `docker-compose.yml` for supporting services (like PostgreSQL, though the current backend uses MongoDB).
+
+---
+
+## Useful Development & Management Commands
+
+All commands should be run from the `backend/` directory.
+
+### **1. View Database Data (Users & Analytics)**
+View a formatted list of all users and the latest 50 analytics records directly in your terminal.
+```bash
+python show_db_data.py
+```
+
+### **2. Set Primary Admin Account**
+Sets `pramodbenagal@gmail.com` as the **only** ADMIN user and resets their password to `Pramod@2004`. Also demotes any other existing admins to standard USER role to ensure exclusivity.
+```bash
+python set_admin.py
+```
+
+### **3. Fix User Roles (Maintenance)**
+If you encounter "Enum" errors (e.g. `UserRole` mismatch), run this script to normalize all user roles in the database to UPPERCASE (ADMIN, USER, etc.).
+```bash
+python fix_user_roles_upper.py
+```
+
+### **4. View Raw User Data**
+View the raw contents of the `users` table via SQLite (bypassing the application logic), useful for debugging if the main dashboard is down.
+```bash
+python check_raw_users.py
+```
+
+---
+
+## Infrastructure
+
+- The project uses **SQLite** by default for development (file: `backend/analytics.db`).
+- It uses **SQLAlchemy** (Async) for ORM mapping.
+- The project is ready for PostgreSQL migration by just updating the `DATABASE_URL` in `.env`.
+
